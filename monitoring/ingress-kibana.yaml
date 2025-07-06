@@ -1,0 +1,47 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kibana-ingress
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internal
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:392:certificate/7228776
+    alb.ingress.kubernetes.io/security-groups: sg-xyz
+    alb.ingress.kubernetes.io/security-groups-auto-add: sg-xyz
+    alb.ingress.kubernetes.io/manage-backend-security-group-rules: "true"
+    alb.ingress.kubernetes.io/subnets: subnet-abc123,subnet-def456
+spec:
+  rules:
+    - host: kibana.abc.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kibana-kibana
+                port:
+                  number: 5601
+    - host: apm-staging.abc.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: apm-server-apm-server
+                port:
+                  number: 8200
+
+    - host: elasticsearch-staging.abc.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: elasticsearch-master
+                port:
+                  number: 9200
+

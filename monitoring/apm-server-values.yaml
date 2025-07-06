@@ -1,0 +1,21 @@
+output:
+  elasticsearch:
+    enabled: true
+    hosts:
+      - http://elasticsearch-master:9200
+
+kibana:
+  enabled: true
+  host: http://kibana-kibana:5601
+
+resources:
+  requests:
+    cpu: "200m"
+    memory: "512Mi"
+  limits:
+    cpu: "500m"
+    memory: "1Gi"
+
+service:
+  type: ClusterIP
+
