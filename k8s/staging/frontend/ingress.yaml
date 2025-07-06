@@ -14,7 +14,7 @@ metadata:
     alb.ingress.kubernetes.io/subnets: subnet-abc123,subnet-def456  
 spec:
   rules:
-   - host: frontend-staging.abc.com
+    - host: frontend-staging.abc.com
       http:
         paths:
           - path: /
