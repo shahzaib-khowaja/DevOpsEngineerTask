@@ -2,12 +2,12 @@ name: CI/CD with ArgoCD
 
 on:
   push:
-    branches: [main, develop]
+    branches: [task]
     paths:
       - 'apps/backend/**'
       - 'apps/frontend/**'
   pull_request:
-    branches: [main, develop]
+    branches: [task]
     paths:
       - 'apps/backend/**'
       - 'apps/frontend/**'
