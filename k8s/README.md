@@ -5,38 +5,51 @@ This repository contains Kubernetes manifests for deploying backend and frontend
 ## 📁 Directory Structure
 
 ```
-k8s-manifests/
-├── production/
-│   └── staging/                    # Production-staging environment
-│       ├── backend/
-│       │   ├── configmap.yaml      # Backend configuration
-│       │   ├── deployment.yaml     # Backend deployment
-│       │   ├── external-secret.yaml # External secrets integration
-│       │   ├── hpa.yaml            # Horizontal Pod Autoscaler
-│       │   ├── ingress.yaml        # Load balancer and routing
-│       │   ├── secret-store.yaml   # Secret store configuration
-│       │   └── service.yaml        # Backend service
-│       └── frontend/
-│           ├── configmap.yaml      # Frontend configuration
-│           ├── deployment.yaml     # Frontend deployment
-│           ├── hpa.yaml            # Horizontal Pod Autoscaler
-│           ├── ingress.yaml        # Load balancer and routing
-│           └── service.yaml        # Frontend service
-└── staging/                        # Development-staging environment
-    ├── backend/
-    │   ├── configmap.yaml          # Backend configuration
-    │   ├── deployment.yaml         # Backend deployment
-    │   ├── external-secret.yaml    # External secrets integration
-    │   ├── hpa.yaml                # Horizontal Pod Autoscaler
-    │   ├── ingress.yaml            # Load balancer and routing
-    │   ├── secret-store.yaml       # Secret store configuration
-    │   └── service.yaml            # Backend service
-    └── frontend/
-        ├── configmap.yaml          # Frontend configuration
-        ├── deployment.yaml         # Frontend deployment
-        ├── hpa.yaml                # Horizontal Pod Autoscaler
-        ├── ingress.yaml            # Load balancer and routing
-        └── service.yaml            # Frontend service
+k8s/
+production
+│   ├── argocd
+│   │   ├── backend
+│   │   │   └── application.yaml
+│   │   ├── frontend
+│   │   │   └── application.yaml
+│   │   └── README.md
+│   ├── backend
+│   │   ├── configmap.yaml
+│   │   ├── deployment.yaml
+│   │   ├── external-secret.yaml
+│   │   ├── hpa.yaml
+│   │   ├── ingress.yaml
+│   │   ├── secret-store.yaml
+│   │   └── service.yaml
+│   └── frontend
+│       ├── configmap.yaml
+│       ├── deployment.yaml
+│       ├── hpa.yaml
+│       ├── ingress.yaml
+│       └── service.yaml
+├── README.md
+└── staging
+    ├── argocd
+    │   ├── backend
+    │   │   └── application.yaml
+    │   ├── frontend
+    │   │   └── application.yaml
+    │   └── README.md
+    ├── backend
+    │   ├── configmap.yaml
+    │   ├── deployment.yaml
+    │   ├── external-secret.yaml
+    │   ├── hpa.yaml
+    │   ├── ingress.yaml
+    │   ├── secret-store.yaml
+    │   └── service.yaml
+    └── frontend
+        ├── configmap.yaml
+        ├── deployment.yaml
+        ├── hpa.yaml
+        ├── ingress.yaml
+        └── service.yaml
+
 ```
 
 ## 🏗️ Architecture Overview
