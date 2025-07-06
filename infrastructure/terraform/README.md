@@ -55,7 +55,7 @@ module "vpc" {
     Project     = "myapp"
   }
 }
-
+```
 # Terraform AWS DocumentDB with Secrets Manager
 
 This repository contains infrastructure-as-code for provisioning **Amazon DocumentDB (MongoDB-compatible)** clusters using **Terraform**, with support for both **staging** and **production** environments. Credentials (username and password) are securely managed through **AWS Secrets Manager**.
