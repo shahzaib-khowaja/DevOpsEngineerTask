@@ -5,7 +5,7 @@ This repository contains infrastructure-as-code for provisioning **Amazon Docume
 ## 📁 Directory Structure
 
 ```
-infra/terraform/
+infrastructure/terraform/
 ├── environments/
 │   ├── staging/
 │   │   └── main.tf
