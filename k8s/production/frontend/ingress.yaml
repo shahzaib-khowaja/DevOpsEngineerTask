@@ -4,27 +4,17 @@ metadata:
   name: production-devops-task-ingress
   annotations:
     kubernetes.io/ingress.class: alb
-    alb.ingress.kubernetes.io/scheme: internal  # Changed from internet-facing to internal
+    alb.ingress.kubernetes.io/scheme: internet-facing  
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:392:certificate/7228776
     alb.ingress.kubernetes.io/security-groups: sg-xyz 
     alb.ingress.kubernetes.io/security-groups-auto-add: sg-xyz
     alb.ingress.kubernetes.io/manage-backend-security-group-rules: "true"
     # Optional: Specify internal subnets
-    alb.ingress.kubernetes.io/subnets: subnet-abc123,subnet-def456  # Add your private subnet IDs
+    alb.ingress.kubernetes.io/subnets: subnet-abc123,subnet-def456  # Add your public subnet IDs
 spec:
   rules:
-    - host: backend-production.abc.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: production-devops-task-backend-svc
-                port:
-                  number: 80
-    - host: frontend-production.abc.com
+   - host: frontend-production.abc.com
       http:
         paths:
           - path: /
