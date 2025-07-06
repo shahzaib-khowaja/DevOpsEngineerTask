@@ -6,32 +6,55 @@ on:
     paths:
       - 'apps/backend/**'
       - 'apps/frontend/**'
-
-jobs:
-  backend:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/backend
-    if: github.event_name == 'push'
+  pull_request:
+    branches: [task]
     paths:
       - 'apps/backend/**'
+      - 'apps/frontend/**'
 
+jobs:
+  # Job to check which files have changed
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.changes.outputs.backend }}
+      frontend: ${{ steps.changes.outputs.frontend }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+      
+      - name: Check for changes
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            backend:
+              - 'apps/backend/**'
+            frontend:
+              - 'apps/frontend/**'
 
+  backend:
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    defaults:
+      run:
+        working-directory: apps/backend
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-
+      
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-
+      
       - name: Build and push Docker image (backend)
         run: |
           IMAGE_URI=${{ secrets.ECR_BACKEND_REPO }}:latest
@@ -40,28 +63,26 @@ jobs:
 
   frontend:
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     defaults:
       run:
         working-directory: apps/frontend
-    if: github.event_name == 'push'
-    paths:
-      - 'apps/frontend/**'
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
+      
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-
+      
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-
+      
       - name: Build and push Docker image (frontend)
         run: |
           IMAGE_URI=${{ secrets.ECR_FRONTEND_REPO }}:latest
