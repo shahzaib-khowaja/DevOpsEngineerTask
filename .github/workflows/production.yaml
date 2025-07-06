@@ -61,7 +61,7 @@ jobs:
         id: build
         run: |
           SHORT_SHA=${GITHUB_SHA::7}
-          IMAGE_URI=${{ secrets.ECR_BACKEND_REPO }}:backend-staging-${SHORT_SHA}
+          IMAGE_URI=${{ secrets.ECR_BACKEND_REPO }}:backend-production-${SHORT_SHA}
           
           docker build -t $IMAGE_URI .
           docker push $IMAGE_URI
@@ -96,7 +96,7 @@ jobs:
         id: build
         run: |
           SHORT_SHA=${GITHUB_SHA::7}
-          IMAGE_URI=${{ secrets.ECR_FRONTEND_REPO }}:frontend-staging-${SHORT_SHA}
+          IMAGE_URI=${{ secrets.ECR_FRONTEND_REPO }}:frontend-production-${SHORT_SHA}
           
           docker build -t $IMAGE_URI .
           docker push $IMAGE_URI
@@ -120,7 +120,7 @@ jobs:
         if: needs.backend.result == 'success'
         run: |
           IMAGE_TAG=${{ needs.backend.outputs.image-tag }}
-          sed -i "s|image: ${{ secrets.ECR_BACKEND_REPO }}:.*|image: ${{ secrets.ECR_BACKEND_REPO }}:backend-staging-${IMAGE_TAG}|g" \
+          sed -i "s|image: ${{ secrets.ECR_BACKEND_REPO }}:.*|image: ${{ secrets.ECR_BACKEND_REPO }}:backend-production-${IMAGE_TAG}|g" \
             k8s/production/backend/deployment.yaml
           echo "Updated backend image to: ${IMAGE_TAG}"
       
@@ -128,7 +128,7 @@ jobs:
         if: needs.frontend.result == 'success'
         run: |
           IMAGE_TAG=${{ needs.frontend.outputs.image-tag }}
-          sed -i "s|image: ${{ secrets.ECR_FRONTEND_REPO }}:.*|image: ${{ secrets.ECR_FRONTEND_REPO }}:frontend-staging-${IMAGE_TAG}|g" \
+          sed -i "s|image: ${{ secrets.ECR_FRONTEND_REPO }}:.*|image: ${{ secrets.ECR_FRONTEND_REPO }}:frontend-production-${IMAGE_TAG}|g" \
             k8s/production/frontend/deployment.yaml
           echo "Updated frontend image to: ${IMAGE_TAG}"
       
