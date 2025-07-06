@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: production-devops-task-backend-config
+  namespace: default
+data:
+  LANDING_URL: "http://example.com"
+  WEB_URL: "http://app.example.com"
+  API_URL: "http://api.example.com"
+  PORT: "8000"
+  NODE_ENV: "production"
+

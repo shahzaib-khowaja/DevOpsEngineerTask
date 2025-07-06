@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: staging-devops-task-backend
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: staging-devops-task-backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: staging-devops-task-backend
+    spec:
+      serviceAccountName: eso-sa  # ✅ Service account with IRSA
+      terminationGracePeriodSeconds: 70
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node.kubernetes.io/instance-type
+                    operator: In
+                    values:
+                      - t3a.medium
+      containers:
+        - name: staging-devops-task-container-backend
+          image: accountid.dkr.ecr.ap-southeast-1.amazonaws.com/imagename:115d9881
+          ports:
+            - containerPort: 8000
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 40"]
+          envFrom:
+            - configMapRef:
+                name: staging-devops-task-backend-config    # ✅ From ConfigMap
+            - secretRef:
+                name: staging-devops-task-backend-secret        # ✅ From AWS via ExternalSecret
+          resources:
+            requests:
+              cpu: "1000m"
+              memory: "1000Mi"
+            limits:
+              cpu: "1500m"
+              memory: "1000Mi"
