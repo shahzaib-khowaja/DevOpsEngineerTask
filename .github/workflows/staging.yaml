@@ -1,0 +1,142 @@
+name: CI/CD with ArgoCD
+
+on:
+  push:
+    branches: [staging]
+    paths:
+      - 'apps/backend/**'
+      - 'apps/frontend/**'
+  pull_request:
+    branches: [staging]
+    paths:
+      - 'apps/backend/**'
+      - 'apps/frontend/**'
+
+jobs:
+  # Job to check which files have changed
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.changes.outputs.backend }}
+      frontend: ${{ steps.changes.outputs.frontend }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      
+      - name: Check for changes
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            backend:
+              - 'apps/backend/**'
+            frontend:
+              - 'apps/frontend/**'
+
+  # CI: Build and Push Images
+  backend:
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    defaults:
+      run:
+        working-directory: apps/backend
+    outputs:
+      image-tag: ${{ steps.build.outputs.image-tag }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+      
+      - name: Build and push Docker image
+        id: build
+        run: |
+          SHORT_SHA=${GITHUB_SHA::7}
+          IMAGE_URI=${{ secrets.ECR_BACKEND_REPO }}:backend-staging-${SHORT_SHA}
+          
+          docker build -t $IMAGE_URI .
+          docker push $IMAGE_URI
+          
+          echo "image-tag=${SHORT_SHA}" >> $GITHUB_OUTPUT
+          echo "Built and pushed: $IMAGE_URI"
+
+  frontend:
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    defaults:
+      run:
+        working-directory: apps/frontend
+    outputs:
+      image-tag: ${{ steps.build.outputs.image-tag }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+      
+      - name: Build and push Docker image
+        id: build
+        run: |
+          SHORT_SHA=${GITHUB_SHA::7}
+          IMAGE_URI=${{ secrets.ECR_FRONTEND_REPO }}:frontend-staging-${SHORT_SHA}
+          
+          docker build -t $IMAGE_URI .
+          docker push $IMAGE_URI
+          
+          echo "image-tag=${SHORT_SHA}" >> $GITHUB_OUTPUT
+          echo "Built and pushed: $IMAGE_URI"
+
+     # CD: Update Kubernetes Manifests for ArgoCD
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [changes, backend, frontend]
+    if: |
+      always() &&
+      (needs.backend.result == 'success' || needs.frontend.result == 'success') &&
+      github.ref == 'refs/heads/staging'
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      
+      - name: Update backend manifest
+        if: needs.backend.result == 'success'
+        run: |
+          IMAGE_TAG=${{ needs.backend.outputs.image-tag }}
+          sed -i "s|image: ${{ secrets.ECR_BACKEND_REPO }}:.*|image: ${{ secrets.ECR_BACKEND_REPO }}:backend-staging-${IMAGE_TAG}|g" \
+            k8s/production/backend/deployment.yaml
+          echo "Updated backend image to: ${IMAGE_TAG}"
+      
+      - name: Update frontend manifest
+        if: needs.frontend.result == 'success'
+        run: |
+          IMAGE_TAG=${{ needs.frontend.outputs.image-tag }}
+          sed -i "s|image: ${{ secrets.ECR_FRONTEND_REPO }}:.*|image: ${{ secrets.ECR_FRONTEND_REPO }}:frontend-staging-${IMAGE_TAG}|g" \
+            k8s/production/frontend/deployment.yaml
+          echo "Updated frontend image to: ${IMAGE_TAG}"
+      
+      - name: Commit and push changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Update image tags for commit ${GITHUB_SHA:0:7}" || echo "No changes to commit"
+          git push
+
