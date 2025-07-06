@@ -6,7 +6,7 @@ This repository contains infrastructure-as-code for provisioning **Amazon Docume
 
 ## 📁 Directory Structure
 
-terraform/
+infra/terraform/
 ├── environments/
 │ ├── staging/
 │ │ └── main.tf
@@ -17,16 +17,10 @@ terraform/
 ├── main.tf
 ├── variables.tf
 └── outputs.tf
----
 
-## 🔐 Secure Credential Management
-
-Credentials for the DocumentDB cluster are **not hardcoded**. Instead, they are stored in **AWS Secrets Manager** and retrieved using Terraform’s data source:
-
-```hcl
-data "aws_secretsmanager_secret_version" "docdb" {
-  secret_id = "staging/docdb/master"  # or "prod/docdb/master"
-}
+yaml
+Copy
+Edit
 
 ---
 
@@ -38,7 +32,15 @@ Credentials for the DocumentDB cluster are **not hardcoded**. Instead, they are 
 data "aws_secretsmanager_secret_version" "docdb" {
   secret_id = "staging/docdb/master"  # or "prod/docdb/master"
 }
+Example secret format:
 
+json
+Copy
+Edit
+{
+  "username": "adminuser",
+  "password": "yourStrongPassword123"
+}
 🛠 Prerequisites
 Terraform v1.3 or higher
 
@@ -46,26 +48,30 @@ AWS CLI configured (aws configure)
 
 Access to:
 
-Secrets Manager
+AWS Secrets Manager
 
-DocumentDB
+Amazon DocumentDB
+
+Subnets and Security Groups in your VPC
 
 🚀 How to Use
 1. Clone the Repository
 bash
 Copy
 Edit
-git clone https://github.com/your-org/terraform-docdb.git
-cd terraform-docdb/terraform/environments/staging
+git clone https://github.com/your-org/your-repo.git
+cd your-repo/infra/terraform/environments/staging
 2. Create Secrets in AWS Secrets Manager
-Staging
+Staging:
+
 bash
 Copy
 Edit
 aws secretsmanager create-secret \
   --name staging/docdb/master \
   --secret-string '{"username":"stagingadmin","password":"stagingPassword123!"}'
-Production
+Production:
+
 bash
 Copy
 Edit
@@ -82,10 +88,10 @@ bash
 Copy
 Edit
 terraform apply
-Type yes when prompted to approve resource creation.
+Type yes when prompted.
 
 🧹 Destroying Infrastructure
-To destroy resources created by Terraform:
+To destroy the resources created by Terraform:
 
 bash
 Copy
@@ -101,5 +107,3 @@ instance_class	Instance type (db.t3.medium, etc.)	string	✅
 subnet_ids	List of subnet IDs	list(string)	✅
 vpc_security_group_ids	List of security group IDs	list(string)	✅
 tags	Tags to apply	map(string)	❌
-
-
