@@ -1,4 +1,4 @@
-# 📦 Stage 1: Build the apps
+# 📦 Stage 1: Build the app
 FROM node:16-alpine AS builder
 
 WORKDIR /app
