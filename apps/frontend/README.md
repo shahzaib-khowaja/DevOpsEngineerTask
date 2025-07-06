@@ -14,8 +14,8 @@
 
 ```bash
 # Build the image
-docker build -t devops-task-backend .
+docker build -t devops-task-frontend .
 
-# Run the container on port 8000
-docker run -p 8000:8000 devops-task-backend
+# Run the container on port 5000
+docker run -p 5000:5000 devops-task-frontend
 
