@@ -9,12 +9,13 @@ on:
 
 jobs:
   backend:
-    if: contains(join(github.event.head_commit.modified, '\n'), 'apps/backend/')
-
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: apps/backend
+    if: github.event_name == 'push'
+    paths:
+      - 'apps/backend/**'
 
     steps:
       - name: Checkout repo
@@ -38,12 +39,14 @@ jobs:
           docker push $IMAGE_URI
 
   frontend:
-    if: contains(join(github.event.head_commit.modified, '\n'), 'apps/frontend/')
-
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: apps/frontend
+    if: github.event_name == 'push'
+    paths:
+      - 'apps/frontend/**'
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
